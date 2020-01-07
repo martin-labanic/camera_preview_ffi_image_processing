@@ -1,0 +1,34 @@
+PODS:
+  - camera (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - image_processing_plugin (0.0.1):
+    - Flutter
+  - wakelock (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - camera (from `.symlinks/plugins/camera/ios`)
+  - Flutter (from `Flutter`)
+  - image_processing_plugin (from `.symlinks/plugins/image_processing_plugin/ios`)
+  - wakelock (from `.symlinks/plugins/wakelock/ios`)
+
+EXTERNAL SOURCES:
+  camera:
+    :path: ".symlinks/plugins/camera/ios"
+  Flutter:
+    :path: Flutter
+  image_processing_plugin:
+    :path: ".symlinks/plugins/image_processing_plugin/ios"
+  wakelock:
+    :path: ".symlinks/plugins/wakelock/ios"
+
+SPEC CHECKSUMS:
+  camera: 38cc83ae9a5667bb5a71c7d9edaf60a91920fd4e
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  image_processing_plugin: 571df8fa0cf0be0e02974067d6821cddedb63b04
+  wakelock: da5012e206ec8978df58d8642e4cdd4fe506185f
+
+PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+
+COCOAPODS: 1.8.4

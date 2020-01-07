@@ -1,0 +1,10 @@
+include: package:pedantic/analysis_options.yaml
+
+linter:
+  rules:
+    - prefer_double_quotes # Prefer double quotes as json does not accept single quotes, and we'll likely need to interact with it at this level.
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+#    implicit-dynamic: false
