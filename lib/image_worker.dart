@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:developer";
 import "dart:isolate";
 import "dart:ffi" as ffi;
+import "dart:typed_data";
 
 import "package:camera/camera.dart";
 import "package:image_processing_plugin/image_processing_plugin.dart";
@@ -12,6 +13,8 @@ class ImageWorker { // Based on the example code provided by google here https:/
 	Isolate _isolate;
 	Completer<bool> _processingResult;
 	final _isolateReady = Completer<void>();
+	static ffi.Pointer<ffi.Uint8> _data;
+	static Uint8List _bytes;
 
 	Future<void> get isReady => _isolateReady.future;
 
@@ -22,6 +25,9 @@ class ImageWorker { // Based on the example code provided by google here https:/
 	void dispose() {
 		_isolate?.kill();
 		_isolate = null;
+		if (_data != null) {
+			free(_data);
+		}
 	}
 
 	Future<bool> processCameraData(CameraImage image) async {
@@ -81,34 +87,32 @@ class ImageWorker { // Based on the example code provided by google here https:/
 		}
 	}
 
-	static ffi.Pointer<ffi.Uint8> concatenatePlanes(List<Plane> planes) {
+	static void concatenatePlanes(List<Plane> planes) {
 		int totalBytes = 0;
 		for (int i = 0; i < planes.length; ++i) {
 			totalBytes += planes[i].bytes.length;
 		}
-		final pointer = allocate<ffi.Uint8>(count: totalBytes);
-		final bytes = pointer.asTypedList(totalBytes);
+		if (_data == null) {
+			_data = allocate<ffi.Uint8>(count: totalBytes);
+			_bytes = _data.asTypedList(totalBytes);
+		}
 		int byteOffset = 0;
 		for (int i = 0; i < planes.length; ++i) {
 			final length = planes[i].bytes.length;
-			bytes.setRange(byteOffset, byteOffset += length, planes[i].bytes);
+			_bytes.setRange(byteOffset, byteOffset += length, planes[i].bytes);
 		}
-		return pointer;
 	}
 
 	static bool runImageProcessing(CameraImage image) {
 		int time = DateTime.now().millisecondsSinceEpoch;
 		print("ZZZZZ runImageProcessing entered. $time");
 		Timeline.startSync("image_worker: concatenate plane data");
-		ffi.Pointer<ffi.Uint8> data = concatenatePlanes(image.planes);
+		concatenatePlanes(image.planes);
 		Timeline.finishSync();
 		print("ZZZZZ runImageProcessing: concatenate plane data: ${DateTime.now().millisecondsSinceEpoch - time}ms");
 
 		Timeline.startSync("image_worker: process image");
-		double result = ImageProcessingPlugin().processImage(data, image.width, image.height, image.planes[0].bytesPerRow);
-		Timeline.finishSync();
-		Timeline.startSync("image_worker: cleanup");
-		free(data);
+		double result = ImageProcessingPlugin().processImage(_data, image.width, image.height, image.planes[0].bytesPerRow);
 		Timeline.finishSync();
 		print("ZZZZZ runImageProcessing: leaving. ${DateTime.now().millisecondsSinceEpoch}");
 		return false; // No image processing occurs so no real point to this result at the moment.
