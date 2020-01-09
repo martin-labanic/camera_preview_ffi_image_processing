@@ -17,11 +17,7 @@ class ImageWorker { // Based on the example code provided by google here https:/
 	static Uint8List _bytes;
 
 	Future<void> get isReady => _isolateReady.future;
-
-	Worker() {
-		init();
-	}
-
+	
 	void dispose() {
 		_isolate?.kill();
 		_isolate = null;
